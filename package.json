@@ -1,0 +1,24 @@
+{
+  "name": "trpc-astro-solid",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@astrojs/node": "^8.3.4",
+    "@astrojs/solid-js": "^4.4.2",
+    "@trpc/client": "^11.0.0-rc.593",
+    "@trpc/server": "^11.0.0-rc.593",
+    "astro": "^4.16.7",
+    "solid-js": "^1.9.3",
+    "superjson": "^2.2.1",
+    "swr": "^2.2.5",
+    "typescript": "^5.6.3"
+  }
+}

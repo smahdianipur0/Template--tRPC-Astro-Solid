@@ -1,0 +1,25 @@
+<div id="sayHello" class="skeleton-parrent">
+  <div style="width:15ch ;" class="skeleton"> </div>
+</div>
+
+<script>
+
+import { trpc } from "../utils/trpc";
+import swr from "../utils/swr";
+
+async function helloFunc() {
+  return await swr.swrFetch("hello", async () => trpc.greeting.query());
+}
+
+const helloHandler = async () => {
+    const [data, error] = await helloFunc();
+    if (data && data.hello) {
+    document.getElementById("sayHello")!.textContent = data.hello;
+    } else if (error) {
+    document.getElementById("sayHello")!.textContent = "Error loading greeting.";
+    } 
+};
+
+helloHandler();
+
+</script>
