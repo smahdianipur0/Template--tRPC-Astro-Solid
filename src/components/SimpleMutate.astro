@@ -1,10 +1,12 @@
+<label for="inputNameTs">Enter your name</label>
 <div class="prose" style="
     display: flex;
     gap: var(--gap);
     justify-content: space-between;
     margin:var(--gap-x04) 0">
+
     <input type="text" name="names" id="inputNameTs">
-    <button id="greet">Greet</button>
+    <button name="greet" id="greet">Greet</button>
 </div>
 
 <div id="greetingMessage" ></div>
@@ -31,11 +33,14 @@ async function greetingFunc(name: string) {
 };
 
 const greetingHandler = async (name: string) => {
-    document.getElementById("greetingMessage")!.textContent = "Loading...";
+    document.getElementById("greetingMessage")!.textContent = "";
+    document.getElementById("greetingMessage")!.classList.add("skeleton");
     const [data, error] = await greetingFunc(name);
     if (data && data.message) {
+        document.getElementById("greetingMessage")!.classList.remove("skeleton");
         document.getElementById("greetingMessage")!.textContent = data.message;
     } else if (error) {
+        document.getElementById("greetingMessage")!.classList.remove("skeleton");
         document.getElementById("greetingMessage")!.textContent = "Error loading greeting";
     }
 };

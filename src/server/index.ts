@@ -13,8 +13,8 @@ const t = initTRPC.context<Context>().create({
 export const router = t.router;
 
 export const appRouter = router({
-    greeting: t.procedure.
-        query(async () => {
+    greeting: t.procedure
+        .query(async () => {
             return { hello: "Hello from tRPC!" };
         }),
 
