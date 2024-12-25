@@ -93,9 +93,9 @@ const queryHelper = {
 
   invalidateCache(cached: object | undefined, data: object | undefined, error: Error | undefined): boolean {
     return (JSON.stringify(cached) !== JSON.stringify(data) &&
-    data !== undefined && 
-    cached !== undefined ) || 
-    (cached === undefined && data !== error);
+      data !== undefined && 
+      cached !== undefined ) || 
+      (cached === undefined && data !== error);
   }
 
 };

@@ -2,6 +2,7 @@ import { initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import type { Context } from "./context.ts";
 import { z } from "zod";
+import  { createPermission } from "../utils/surreal-cloud";
 
 const t = initTRPC.context<Context>().create({
     transformer: {
@@ -27,6 +28,19 @@ export const appRouter = router({
         .mutation(async ({ input }) => {
             return { message: `Hello ${input.names}!!` };
         }),
+
+    dbInteraction: t.procedure
+        .input(z.object({
+              user: z.string(),
+              vaultCount: z.number(),
+            }),
+        )
+        .mutation(async ({ input }) => {
+                await createPermission(input.user, input.vaultCount);
+                return { message: "done" } ;
+        }),
+
+
 });
 
 export type AppRouter = typeof appRouter;

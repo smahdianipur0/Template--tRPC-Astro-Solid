@@ -1,0 +1,33 @@
+---
+import Card from "../components/Card.astro"
+
+---
+<Card title = "db interaction" cardID='db-card'>
+    
+<button id="create-permission"> click </button>
+
+<h1 id="db-result"></h1>
+
+</Card>
+
+<script>
+
+import { trpc } from "../utils/trpc";
+import queryHelper from "../utils/query-helper"
+
+
+
+document.getElementById("fetchAndMutate")!.addEventListener("click", (e) => {
+    if ((e!.target as HTMLInputElement).matches("#create-permission")) {
+       ( async () => {
+        const [data, error] = await queryHelper.mutate("db", () => 
+            trpc.dbInteraction.mutate({"user" : "saeed", "vaultCount" : 5 }));
+        if (data && data.message) {
+        document.getElementById("db-result")!.textContent = data.message;
+            }
+        })
+    }
+});
+
+
+</script>
