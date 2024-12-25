@@ -17,15 +17,20 @@ import queryHelper from "../utils/query-helper"
 
 
 
-document.getElementById("fetchAndMutate")!.addEventListener("click", (e) => {
+document.getElementById("db-card")!.addEventListener("click", (e) => {
     if ((e!.target as HTMLInputElement).matches("#create-permission")) {
-       ( async () => {
-        const [data, error] = await queryHelper.mutate("db", () => 
-            trpc.dbInteraction.mutate({"user" : "saeed", "vaultCount" : 5 }));
-        if (data && data.message) {
-        document.getElementById("db-result")!.textContent = data.message;
+        console.log("Create permission button clicked.");
+        (async () => {
+            console.log("Preparing to call dbInteraction mutation.");
+            const [data, error] = await queryHelper.mutate("db", () => 
+                trpc.dbInteraction.mutate({"user": "saeed", "vaultCount": 5 }));
+            console.log("Mutation response:", { data, error });
+            if (data && data.message) {
+                document.getElementById("db-result")!.textContent = data.message;
+            } else {
+                console.error("No message returned from mutation.");
             }
-        })
+        })();
     }
 });
 

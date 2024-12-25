@@ -36,7 +36,9 @@ export const appRouter = router({
             }),
         )
         .mutation(async ({ input }) => {
+                console.log(`Received mutation request with user: ${input.user} and vaultCount: ${input.vaultCount}`);
                 await createPermission(input.user, input.vaultCount);
+                console.log("Permission created successfully.");
                 return { message: "done" } ;
         }),
 
