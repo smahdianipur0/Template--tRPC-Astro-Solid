@@ -15,7 +15,7 @@ export const router = t.router;
 export const appRouter = router({
     greeting: t.procedure
         .query(async () => {
-            return { hello: "Hello from tRPC!" };
+            return { message: "Hello from tRPC!" };
         }),
 
     greetWithName: t.procedure

@@ -1,11 +1,11 @@
-<label for="inputNameTs">Enter your name</label>
+<label for="input-name">Enter your name</label>
 <div class="prose" style="
     display: flex;
     gap: var(--gap);
     justify-content: space-between;
     margin:var(--gap-x04) 0">
 
-    <input type="text" name="names" id="inputNameTs">
+    <input type="text" name="names" id="input-name">
     <button name="greet" id="greet">Greet</button>
 </div>
 
@@ -14,28 +14,25 @@
 <script>
 
 import { trpc } from "../utils/trpc";  
-import swr from '../utils/swr'; 
+import queryHelper from "../utils/query-helper"
 import { createSignal } from "solid-js";
 
 const [name, setName] = createSignal("OldMate");
 
 document.getElementById("fetchAndMutate")!.addEventListener("input", (e) => {
-    if ((e!.target as HTMLInputElement).matches("#inputNameTs")) {
+    if ((e!.target as HTMLInputElement).matches("#input-name")) {
         const value = (e!.target as HTMLInputElement).value;
         setName(value.toString());
     }
 });
 
-async function greetingFunc(name: string) {
-    return await swr.noStaleMutate("greeting", () =>
-        trpc.greetWithName.mutate({ names: name }),
-    );
-};
-
 const greetingHandler = async (name: string) => {
     document.getElementById("greetingMessage")!.textContent = "";
     document.getElementById("greetingMessage")!.classList.add("skeleton");
-    const [data, error] = await greetingFunc(name);
+
+    const [data, error] = await queryHelper.mutate("greeting", () =>
+        trpc.greetWithName.mutate({ names: name }))
+
     if (data && data.message) {
         document.getElementById("greetingMessage")!.classList.remove("skeleton");
         document.getElementById("greetingMessage")!.textContent = data.message;

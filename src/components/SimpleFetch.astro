@@ -1,21 +1,26 @@
-<div id="sayHello" class="skeleton-parrent">
+<div id="say-hello" class="skeleton-parrent">
   <div style="width:15ch ;" class="skeleton"> </div>
 </div>
 
 <script>
 import { trpc } from "../utils/trpc";
-import swr from "../utils/swr";
+import queryHelper, {cache} from "../utils/query-helper";
+type helloRes = { message: string; [key: string]: unknown };
 
-async function helloFunc() {
-  return await swr.swrFetch("hello", async () => trpc.greeting.query());
+async function helloHandler() {
+  const cached: helloRes = cache.get("hello");
+  if (cached?.message){
+    document.getElementById("say-hello")!.textContent = cached?.message;
+  }
+
+  const [data, error] = await queryHelper.fetch("hello", () => trpc.greeting.query());
+  if ( queryHelper.invalidateCache(cached, data, error)) {
+    document.getElementById("say-hello")!.textContent = data?.message ?? error?.message ?? "";
+  }
 }
 
-const [data, error] = await helloFunc();
 
-if (data && data.hello) {
-  document.getElementById("sayHello")!.textContent = data.hello;
-} else if (error) {
-  document.getElementById("sayHello")!.textContent = error.message;
-} 
+await helloHandler();
+queryHelper.revalidatListener(async() => await helloHandler()); 
 
 </script>

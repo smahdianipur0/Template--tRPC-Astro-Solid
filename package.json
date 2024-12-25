@@ -16,9 +16,9 @@
     "@trpc/client": "^11.0.0-rc.593",
     "@trpc/server": "^11.0.0-rc.593",
     "astro": "^4.16.13",
+    "flat-cache": "^6.1.4",
     "solid-js": "^1.9.3",
     "superjson": "^2.2.1",
-    "swr": "^2.2.5",
     "typescript": "^5.6.3"
   }
 }
