@@ -4,9 +4,8 @@ import Card from "../components/Card.astro"
 ---
 <Card title = "db interaction" cardID='db-card'>
     
-<button id="create-permission"> click </button>
-
-<h1 id="db-result"></h1>
+    <button id="create-permission"> click </button>
+    <h2 id="db-result"></h2>
 
 </Card>
 
@@ -23,7 +22,7 @@ document.getElementById("db-card")!.addEventListener("click", (e) => {
         (async () => {
             console.log("Preparing to call dbInteraction mutation.");
             const [data, error] = await queryHelper.mutate("db", () => 
-                trpc.dbInteraction.mutate({"user": "saeed", "vaultCount": 5 }));
+                trpc.dbInteraction.mutate({"user": "maggie", "vaultName": "hello" }));
             console.log("Mutation response:", { data, error });
             if (data && data.message) {
                 document.getElementById("db-result")!.textContent = data.message;

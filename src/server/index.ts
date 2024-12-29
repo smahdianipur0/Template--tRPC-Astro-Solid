@@ -32,12 +32,12 @@ export const appRouter = router({
     dbInteraction: t.procedure
         .input(z.object({
               user: z.string(),
-              vaultCount: z.number(),
+              vaultName: z.string(),
             }),
         )
         .mutation(async ({ input }) => {
-                console.log(`Received mutation request with user: ${input.user} and vaultCount: ${input.vaultCount}`);
-                await createPermission(input.user, input.vaultCount);
+                console.log(`Received mutation request with user: ${input.user} and vaultName: ${input.vaultName}`);
+                await createPermission(input.user, input.vaultName);
                 console.log("Permission created successfully.");
                 return { message: "done" } ;
         }),

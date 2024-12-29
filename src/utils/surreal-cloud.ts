@@ -24,32 +24,40 @@ async function getDb(){
 
 
 export type permissions = {
-  id?: {tb: string, id: string};
   user: string;
-  vaultCount: number;
+  vaultName: string;
 }
 
-async function createEntry(tableName: string, user: string, vaultCount: number): Promise<void> {
+export async function createPermission(user: string, vaultName: string): Promise<void> {
   const db = await getDb();
   if (!db) {
     console.error("Database not initialized");
     return;
   }
   try {
-    console.log(`Creating entry in table ${tableName} with user: ${user} and vaultCount: ${vaultCount}`);
-    const entry = await db.create<permissions>(tableName, {
-      user,
-      vaultCount,
-    });
+    console.log(`Creating entry in table  with user`);
+        console.log(vaultName);
+    const valut = db.select(new RecordId('vaults', vaultName));
+
+      if ( JSON.stringify(valut) === '{}'){
+        console.log('adding new');
+        const entry = await db.create<permissions>(new RecordId('permissions', 'oldmate'), {
+        vaultCount: 1,
+      });
+        const newVault = await db.create<permissions>(new RecordId('vaults', vaultName)); 
+
+    } else { 
+      console.log('incrementing');
+      const newCount = valut.vaultCount + 1 ;
+      const neEntry = await db.create<permissions>(new RecordId('permissions', user), {
+        vaultCount: newCount,
+      });
+      console.log(newCount);
+    }
     console.log("Entry created successfully:", entry);
   } catch (err: unknown) {
-    console.error(`Failed to create entry in ${tableName}:`, err instanceof Error ? err.message : String(err));
+    console.error(`Failed to create entry in:`, err instanceof Error ? err.message : String(err));
   } finally {
     await db.close();
   }
-}
-
-
-export async function createPermission(user: string, vaultCount: number): Promise<void> {
-  await createEntry("permissions", user, vaultCount);
 }
