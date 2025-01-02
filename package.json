@@ -13,6 +13,7 @@
     "@astrojs/check": "^0.9.4",
     "@astrojs/node": "^8.3.4",
     "@astrojs/solid-js": "^4.4.3",
+    "@passwordless-id/webauthn": "^2.1.2",
     "@trpc/client": "^11.0.0-rc.593",
     "@trpc/server": "^11.0.0-rc.593",
     "astro": "^4.16.13",

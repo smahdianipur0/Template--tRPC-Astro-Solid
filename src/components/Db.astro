@@ -1,0 +1,58 @@
+---
+import Card from "../components/Card.astro"
+
+---
+<Card title = "db interaction" cardID='db-card'>
+    
+    <button id="create-permission"> click </button>
+    <h2 id="db-result"></h2>
+
+</Card>
+
+<script>
+
+import { trpc } from "../utils/trpc";
+import queryHelper from "../utils/query-helper"
+import {client} from '@passwordless-id/webauthn'
+
+
+
+document.getElementById("db-card")!.addEventListener("click", (e) => {
+    if ((e!.target as HTMLInputElement).matches("#create-permission")) {
+        console.log("Create permission button clicked.");
+        (async () => {
+            const [data, error] = await queryHelper.mutate("db", () => 
+                trpc.challenge.query());
+            if (data?.message) {
+                const registration = await client.register({
+                  user: "Arnaud",
+                  challenge: data.message,
+                });
+                console.log(registration);
+                const [registryData, registryError] = await queryHelper.mutate("db", () => 
+                    trpc.registry.mutate({
+                        "registration": registration,
+                        "challenge": data.message
+                    }));
+                console.log(registryData, registryError);
+                console.log({"registration" :registration, "challenge": data.message});
+
+            }
+            // console.log("Preparing to call dbInteraction mutation.");
+            // const [data, error] = await queryHelper.mutate("db", () => 
+            //     trpc.dbInteraction.mutate({"user": "maggie", "vaultName": "hello" }));
+            // console.log("Mutation response:", { data, error });
+            // if (data && data.message) {
+            //     document.getElementById("db-result")!.textContent = data.message;
+            // } else {
+            //     console.error("No message returned from mutation.");
+            // }
+
+
+
+        })();
+    }
+});
+
+
+</script>
