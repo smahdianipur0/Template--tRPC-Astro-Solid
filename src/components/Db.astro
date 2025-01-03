@@ -4,7 +4,8 @@ import Card from "../components/Card.astro"
 ---
 <Card title = "db interaction" cardID='db-card'>
     
-    <button id="create-permission"> click </button>
+    <button id="create-permission"> registration </button>
+    <button id="authentication"> authentication </button>
     <h2 id="db-result"></h2>
 
 </Card>
@@ -19,7 +20,6 @@ import {client} from '@passwordless-id/webauthn'
 
 document.getElementById("db-card")!.addEventListener("click", (e) => {
     if ((e!.target as HTMLInputElement).matches("#create-permission")) {
-        console.log("Create permission button clicked.");
         (async () => {
             const [data, error] = await queryHelper.mutate("db", () => trpc.challenge.query());
             if (data?.message) {
@@ -40,6 +40,29 @@ document.getElementById("db-card")!.addEventListener("click", (e) => {
             }
         })();
     }
+
+    if ((e!.target as HTMLInputElement).matches("#authentication")) {
+        (async () => {
+            const [data, error] = await queryHelper.mutate("db", () => trpc.challenge.query());
+            if (data?.message) {
+                const authentication = await client.authenticate({
+                  challenge: data.message,
+                  timeout: 60000
+                });
+
+                console.log(authentication);
+                const [authData, authError] = await queryHelper.mutate("auth", async () => {
+                    return await trpc.authenticate.mutate({
+                        challenge: data.message,
+                        authenticationData: authentication,
+                    });
+                });
+                console.log(authData, authError)
+
+            }
+        })();
+    }
+    
 });
 
 

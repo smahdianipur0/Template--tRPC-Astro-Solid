@@ -53,3 +53,27 @@ export async function createUser(userID: string, credential: object): Promise<st
 
   return result;
 }
+
+export async function queryUser(userID: string): Promise<object | undefined> {
+  const db = await getDb();
+  let result: objrct | undefined;
+
+  if (!db) {
+    result = "Database not initialized";
+  } else {
+    try {
+      const getobject = await db.query<[userID: string, credential[]]>(
+        'SELECT credentials FROM users WHERE UID = $UID ;',
+        { UID: userID }
+      );
+      result = getobject[0];
+      console.log(result);
+    } catch (err: unknown) {
+      result = "Failed to search for user";
+    } finally {
+      await db.close();
+    }
+  }
+
+  return result;
+}

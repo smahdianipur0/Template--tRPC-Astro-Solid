@@ -2,7 +2,7 @@ import { initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import type { Context } from "./context.ts";
 import { z } from "zod";
-import { createUser } from "../utils/surreal-cloud";
+import { createUser, queryUser } from "../utils/surreal-cloud";
 import { server } from '@passwordless-id/webauthn'
 
 
@@ -15,6 +15,46 @@ const t = initTRPC.context<Context>().create({
 
 export const router = t.router;
 
+const registrationInputSchema = z.object({ 
+    challenge: z.string(),
+    registry : z.object({  
+      type: z.literal("public-key"),  
+      id: z.string(),  
+      rawId: z.string(),  
+      authenticatorAttachment: z.string(),  
+      clientExtensionResults: z.object({}),  
+      response: z.object({  
+        attestationObject: z.string(),  
+        authenticatorData: z.string(),  
+        clientDataJSON: z.string(),  
+        publicKey: z.string(),  
+        publicKeyAlgorithm: z.number(),  
+        transports: z.array(z.string())  
+      }),  
+      user: z.object({ name: z.string(), id: z.string().uuid()  
+      })  
+    })  
+})
+
+const authenticationInputSchema = z.object({  
+    challenge: z.string(),  
+    authenticationData: z.object({  
+        authenticatorAttachment: z.string(),  
+        clientExtensionResults: z.object({}),  
+        id: z.string(),  
+        rawId: z.string(),  
+        type: z.string(),  
+        response: z.object({  
+            authenticatorData: z.string(),  
+            clientDataJSON: z.string(),  
+            signature: z.string(),  
+            userHandle: z.string(),  
+        }),  
+    })  
+});
+
+
+
 export const appRouter = router({
 
     challenge: t.procedure
@@ -25,29 +65,7 @@ export const appRouter = router({
         }),
 
     registry:t.procedure
-        .input(
-            z.object({ 
-                challenge: z.string(),
-                registry : z.object({  
-                  type: z.literal("public-key"),  
-                  id: z.string(),  
-                  rawId: z.string(),  
-                  authenticatorAttachment: z.string(),  
-                  clientExtensionResults: z.object({}),  
-                  response: z.object({  
-                    attestationObject: z.string(),  
-                    authenticatorData: z.string(),  
-                    clientDataJSON: z.string(),  
-                    publicKey: z.string(),  
-                    publicKeyAlgorithm: z.number(),  
-                    transports: z.array(z.string())  
-                  }),  
-                  user: z.object({ name: z.string(), id: z.string().uuid()  
-                  })  
-                })  
-            })
-        )
-            
+        .input(registrationInputSchema)      
         .mutation(async ({ input }) => {
             let addToDb: string | undefined;
             const expected = {
@@ -60,6 +78,25 @@ export const appRouter = router({
                 console.log(addToDb); 
             }
             return { message: addToDb || "User not created" };
+        }),
+
+    authenticate:t.procedure
+        .input(authenticationInputSchema)
+        .mutation(async({input}) =>{
+            const credentialKey  = await queryUser(input.authenticationData.id);
+            if (!credentialKey){ return { message: "Failed to find user" }}
+
+            const expected = {
+                challenge: input.challenge,
+                origin: "http://localhost:4321",
+                userVerified: true, 
+            }
+            
+            const authenticationParsed = await server.verifyAuthentication(input.authenticationData, credentialKey[0].credentials, expected)
+            if (authenticationParsed.userVerified === true) {
+
+            }
+            return { message: authenticationParsed  || "User not authenticated" };
         }),        
 
     greetWithName: t.procedure
