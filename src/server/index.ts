@@ -2,12 +2,9 @@ import { initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import type { Context } from "./context.ts";
 import { z } from "zod";
-<<<<<<< Updated upstream
-=======
-import  { createPermission } from "../utils/surreal-cloud";
-import {server} from '@passwordless-id/webauthn'
+import { createUser } from "../utils/surreal-cloud";
+import { server } from '@passwordless-id/webauthn'
 
->>>>>>> Stashed changes
 
 const t = initTRPC.context<Context>().create({
     transformer: {
@@ -19,6 +16,7 @@ const t = initTRPC.context<Context>().create({
 export const router = t.router;
 
 export const appRouter = router({
+
     challenge: t.procedure
         .query(async () => {
             const challenge = server.randomChallenge()
@@ -28,29 +26,40 @@ export const appRouter = router({
 
     registry:t.procedure
         .input(
-            z.object({
-              user: z.object({  
-                id: z.string(),
-                name: z.string(),  
-                displayName: z.string(),  
-              }),  
-              credential: z.object({  
-                id: z.string(),  
-                publicKey: z.string(),  
-                algorithm: z.string(),
-                transports: z.array(z.enum(['internal', 'hybrid'])) 
-              }),  
-              authenticatorData: z.string(),  
-              clientData: z.string(),  
-            });  
+            z.object({ 
+                challenge: z.string(),
+                registry : z.object({  
+                  type: z.literal("public-key"),  
+                  id: z.string(),  
+                  rawId: z.string(),  
+                  authenticatorAttachment: z.string(),  
+                  clientExtensionResults: z.object({}),  
+                  response: z.object({  
+                    attestationObject: z.string(),  
+                    authenticatorData: z.string(),  
+                    clientDataJSON: z.string(),  
+                    publicKey: z.string(),  
+                    publicKeyAlgorithm: z.number(),  
+                    transports: z.array(z.string())  
+                  }),  
+                  user: z.object({ name: z.string(), id: z.string().uuid()  
+                  })  
+                })  
+            })
+        )
+            
         .mutation(async ({ input }) => {
+            let addToDb: string | undefined;
             const expected = {
                 challenge: input.challenge,
                 origin: "http://localhost:4321",
             }
-            const registrationParsed = await server.verifyRegistration(input.registration, expected);
-            console.log(registrationParsed);
-            return { message: registrationParsed };
+            const registrationParsed = await server.verifyRegistration(input.registry, expected);
+            if (registrationParsed.userVerified === true) {
+                addToDb = await createUser(registrationParsed.credential.id, registrationParsed.credential);
+                console.log(addToDb); 
+            }
+            return { message: addToDb || "User not created" };
         }),        
 
     greetWithName: t.procedure

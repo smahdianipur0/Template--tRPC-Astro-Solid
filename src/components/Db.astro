@@ -21,35 +21,23 @@ document.getElementById("db-card")!.addEventListener("click", (e) => {
     if ((e!.target as HTMLInputElement).matches("#create-permission")) {
         console.log("Create permission button clicked.");
         (async () => {
-            const [data, error] = await queryHelper.mutate("db", () => 
-                trpc.challenge.query());
+            const [data, error] = await queryHelper.mutate("db", () => trpc.challenge.query());
             if (data?.message) {
                 const registration = await client.register({
                   user: "Arnaud",
                   challenge: data.message,
                 });
+
                 console.log(registration);
-                const [registryData, registryError] = await queryHelper.mutate("db", () => 
-                    trpc.registry.mutate({
-                        "registration": registration,
-                        "challenge": data.message
-                    }));
+                const [registryData, registryError] = await queryHelper.mutate("db", async () => {
+                    return await trpc.registry.mutate({
+                        challenge: data.message,
+                        registry: registration,
+                    });
+                });
                 console.log(registryData, registryError);
-                console.log({"registration" :registration, "challenge": data.message});
 
             }
-            // console.log("Preparing to call dbInteraction mutation.");
-            // const [data, error] = await queryHelper.mutate("db", () => 
-            //     trpc.dbInteraction.mutate({"user": "maggie", "vaultName": "hello" }));
-            // console.log("Mutation response:", { data, error });
-            // if (data && data.message) {
-            //     document.getElementById("db-result")!.textContent = data.message;
-            // } else {
-            //     console.error("No message returned from mutation.");
-            // }
-
-
-
         })();
     }
 });
